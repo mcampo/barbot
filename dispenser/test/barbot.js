@@ -43,6 +43,17 @@ describe('Barbot', () => {
     it('should reject if there is no recipe for requested drink', () => {
       return assert.isRejected(barbot.makeDrink('unknown drink'))
     })
+
+    it('should reject if it already making another drink', () => {
+      dispenser.goToPosition = () => new Promise(() => {}) //returns promise that never resolves
+      barbot.makeDrink('fernet')
+      return assert.isRejected(barbot.makeDrink('fernet'))
+    })
+
+    it('should a make drink if asked after another drink is finished', () => {
+      return barbot.makeDrink('fernet').then(() => barbot.makeDrink('fernet'))
+    })
+
   })
 
 })
