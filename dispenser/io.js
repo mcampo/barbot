@@ -1,20 +1,23 @@
 'use strict'
-const IO = require('socket.io')
+const ioClient = require('socket.io-client')
+const IO_URL = process.env.IO_URL || 'http://localhost:8000'
 
 function io(barbot) {
-  let ioServer = IO(8000)
-  console.log('io server created')
+  let socket = ioClient.connect(IO_URL)
+  socket.on('connect', () => {
+    console.log('socket connected')
 
-  ioServer.on('connection', (socket) => {
-    console.log(`Socket ${socket.id} connected`)
     socket.on('drink', (data, ack) => {
       console.log('Received "drink" event', data)
       barbot.makeDrink(data.drinkName)
-      ack()
+        .then(ack)
+        .catch(ack)
     })
+
     socket.on('disconnect', () => {
-      console.log(`Socket ${socket.id} disconnected`)
+      console.log(`Socket disconnected`)
     })
+
   })
 }
 

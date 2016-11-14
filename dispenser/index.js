@@ -9,7 +9,9 @@ const RECIPES = {
 }
 
 let dispenser = new DispenserDriver({debug: true})
-dispenser.initialize().then(() => {
-  let barbot = new Barbot(dispenser, RECIPES)
-  io(barbot)
-})
+dispenser.initialize()
+  .then(() => {
+    let barbot = new Barbot(dispenser, RECIPES)
+    io(barbot)
+  })
+  .catch(console.error)
