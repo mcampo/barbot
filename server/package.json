@@ -1,0 +1,16 @@
+{
+  "name": "barbot-server",
+  "version": "0.1.0",
+  "description": "Reads the twitter feed and notifies the dispenser via websocket",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Mariano Campo",
+  "license": "MIT",
+  "dependencies": {
+    "nconf": "^0.8.4",
+    "socket.io": "^1.5.1",
+    "twit": "^2.2.5"
+  }
+}

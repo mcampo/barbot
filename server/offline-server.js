@@ -10,11 +10,11 @@ let rl = readline.createInterface({
 
 console.log('io server created')
 
-ioServer.on('connection', (socket) => {
+ioServer.on('connection', socket => {
   console.log(`Socket ${socket.id} connected`)
   rl.prompt()
   rl.on('line', line => {
-    socket.emit('drink', { drinkName: line }, (err) => {
+    socket.emit('drink', { drinkName: line }, err => {
       if (err) {
         return console.log('error received:', err)
       }
