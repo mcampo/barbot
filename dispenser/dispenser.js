@@ -2,16 +2,16 @@
 const five = require('johnny-five')
 
 const PIN_ENABLE = 8
-const PIN_SERVO = 9
+const PIN_SERVO = 10
 const PIN_STEP = 11
 const PIN_DIR = 12
 const STEPS_PER_REV = 200 * 16
 const STEPS_PER_POSITION = 166 * 16
 const POSITIONS_COUNT = 4
-
+const SERVO_START_POSITION = 0
+const SERVO_END_POSITION = 120
 
 class DispenserDriver {
-
   constructor(options) {
     this.options = Object.assign({ debug: false }, options)
   }
@@ -42,7 +42,7 @@ class DispenserDriver {
 
     this.servo = new five.Servo({
       pin: PIN_SERVO,
-      startAt: 0
+      startAt: SERVO_START_POSITION
     })
 
     this.stepper = new five.Stepper({
@@ -52,12 +52,8 @@ class DispenserDriver {
         step: PIN_STEP,
         dir: PIN_DIR
       }
-    });
-    this.stepper
-      .rpm(15)
-      .cw()
-      .accel(0)
-      .decel(0)
+    })
+    this.stepper.rpm(15).cw().accel(0).decel(0)
   }
 
   goToPosition(newPosition) {
@@ -78,25 +74,30 @@ class DispenserDriver {
     })
   }
 
-  serve(amount) {
+  serve(amount = 1) {
     if (amount <= 0) {
       return Promise.resolve()
     }
-    return moveServo(this.servo, 130)
-            .then(() => new Promise(resolve => setTimeout(resolve, 2000)))
-            .then(() => moveServo(this.servo, 0))
-            .then(() => this.serve(amount - 1))
+    this.enablePin.low()
+    return moveServo(this.servo, SERVO_END_POSITION)
+      .then(() => new Promise(resolve => setTimeout(resolve, 3500)))
+      .then(() => moveServo(this.servo, SERVO_START_POSITION))
+      .then(() => this.enablePin.high())
+      .then(() => new Promise(resolve => setTimeout(resolve, 3500)))
+      .then(() => this.serve(amount - 1))
   }
-
 }
 
 function getStepOptions(currentPosition, newPosition) {
   let positionsToMove = Math.abs(newPosition - currentPosition)
-  let direction = newPosition > currentPosition ? five.Stepper.DIRECTION.CW : five.Stepper.DIRECTION.CCW
+  let direction =
+    newPosition > currentPosition
+      ? five.Stepper.DIRECTION.CW
+      : five.Stepper.DIRECTION.CCW
 
   //check if it's shorter going the other way
-  if (positionsToMove > (POSITIONS_COUNT / 2)) {
-    positionsToMove = (positionsToMove - (POSITIONS_COUNT / 2))
+  if (positionsToMove > POSITIONS_COUNT / 2) {
+    positionsToMove = positionsToMove - POSITIONS_COUNT / 2
     direction = inverseDirection(direction)
   }
 
@@ -104,11 +105,12 @@ function getStepOptions(currentPosition, newPosition) {
     steps: positionsToMove * STEPS_PER_POSITION,
     direction: direction
   }
-
 }
 
 function inverseDirection(direction) {
-  return direction === five.Stepper.DIRECTION.CW ? five.Stepper.DIRECTION.CCW : five.Stepper.DIRECTION.CW
+  return direction === five.Stepper.DIRECTION.CW
+    ? five.Stepper.DIRECTION.CCW
+    : five.Stepper.DIRECTION.CW
 }
 
 function moveServo(servo, toPosition) {
@@ -117,7 +119,7 @@ function moveServo(servo, toPosition) {
       console.log('move:complete')
       resolve()
     })
-    servo.to(toPosition, 1000)
+    servo.to(toPosition, 600)
   })
 }
 

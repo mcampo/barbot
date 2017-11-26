@@ -1,15 +1,15 @@
 {
-  "name": "cocktail",
-  "version": "1.0.0",
+  "name": "barbot",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "mocha --recursive test"
   },
-  "author": "",
+  "author": "Mariano Campo",
   "license": "MIT",
   "dependencies": {
-    "johnny-five": "^0.10.1",
+    "johnny-five": "^0.11.7",
     "socket.io": "^1.5.1"
   },
   "devDependencies": {
